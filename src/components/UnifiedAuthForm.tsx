@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { AuthFormProps, LoginCredentials } from '../types';
 import { LoginForm } from './LoginForm';

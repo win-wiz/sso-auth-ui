@@ -115,6 +115,10 @@ function checkDependencies() {
 }
 
 async function checkGitStatus(options) {
+    if (options.skipGitCheck) {
+        logInfo('根据--skip-git-check选项，跳过Git状态检查。');
+        return;
+    }
     logStep('检查Git状态');
     const status = execCommandSilent('git status --porcelain');
     if (!status) {
@@ -279,17 +283,19 @@ ${colors.bright}SSO Auth UI 自动化发布脚本${colors.reset}
   --skip-tests         跳过测试
   --dry-run            试运行模式
   --non-interactive    非交互模式 (CI/CD)
+  --skip-git-check     跳过Git状态检查
   --help, -h           显示帮助信息
 `);
 }
 
 function parseArgs() {
-  const options = { versionType: 'patch', skipTests: false, dryRun: false, nonInteractive: false };
+  const options = { versionType: 'patch', skipTests: false, dryRun: false, nonInteractive: false, skipGitCheck: false };
   for (const arg of process.argv.slice(2)) {
     if (['--major', '--minor', '--patch'].includes(arg)) options.versionType = arg.substring(2);
     else if (arg === '--skip-tests') options.skipTests = true;
     else if (arg === '--dry-run') options.dryRun = true;
     else if (arg === '--ci' || arg === '--non-interactive') options.nonInteractive = true;
+    else if (arg === '--skip-git-check') options.skipGitCheck = true;
     else if (arg === '--help' || arg === '-h') {
       showHelp();
       process.exit(0);

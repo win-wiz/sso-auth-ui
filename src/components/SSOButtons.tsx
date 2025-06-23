@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { SSOIcon } from '@tjsglion/sso-icons';
 import { SSOButtonsProps } from '../types';

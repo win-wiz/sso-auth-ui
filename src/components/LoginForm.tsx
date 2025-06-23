@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { LoginFormProps, AuthContextType } from '../types';
 import { SSOButtons } from './SSOButtons';
