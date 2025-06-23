@@ -20,7 +20,7 @@ const commonPlugins = [
     declaration: true,
     declarationDir: './dist',
     sourceMap: !isProduction,
-    exclude: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**']
+    exclude: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', 'examples/**/*']
   })
 ];
 

@@ -27,18 +27,18 @@
 ### 安装
 
 ```bash
-npm install @your-org/sso-auth-ui
+npm install @tjsglion/sso-auth-ui
 # 或
-yarn add @your-org/sso-auth-ui
+yarn add @tjsglion/sso-auth-ui
 # 或
-pnpm add @your-org/sso-auth-ui
+pnpm add @tjsglion/sso-auth-ui
 ```
 
 ### 基础使用
 
 ```tsx
 import React from 'react';
-import { LoginForm, AuthProvider } from '@your-org/sso-auth-ui';
+import { LoginForm, AuthProvider } from '@tjsglion/sso-auth-ui';
 
 // 最简单的配置
 const config = {
@@ -73,7 +73,7 @@ function App() {
 
 ```tsx
 import React, { useState } from 'react';
-import { AuthProvider, LoginForm, RegisterForm, createTheme } from '@your-org/sso-auth-ui';
+import { AuthProvider, LoginForm, RegisterForm, createTheme } from '@tjsglion/sso-auth-ui';
 
 // 完整配置
 const config = {
@@ -226,7 +226,7 @@ const config = {
 ### 2. 主题定制
 
 ```tsx
-import { createTheme } from '@your-org/sso-auth-ui';
+import { createTheme } from '@tjsglion/sso-auth-ui';
 
 const customTheme = createTheme({
   primaryColor: '#3b82f6',           // 主色调
@@ -312,7 +312,7 @@ const customTheme = createTheme({
 #### useAuthContext - 认证上下文
 
 ```tsx
-import { useAuthContext } from '@your-org/sso-auth-ui';
+import { useAuthContext } from '@tjsglion/sso-auth-ui';
 
 function MyComponent() {
   const { user, isAuthenticated, login, logout } = useAuthContext();

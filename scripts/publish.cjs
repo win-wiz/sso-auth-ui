@@ -207,6 +207,15 @@ function runTests() {
     // 检查是否有测试脚本
     const pkg = readPackageJson();
     if (pkg.scripts.test) {
+      // 检查测试脚本是否是占位符
+      const testScript = pkg.scripts.test;
+      if (testScript.includes('echo "No tests specified') || 
+          testScript.includes('echo "Error: no test specified') ||
+          testScript.includes('exit 0')) {
+        logInfo('测试脚本为占位符，跳过测试');
+        return;
+      }
+      
       execCommand('npm test');
       logSuccess('测试通过');
     } else {
