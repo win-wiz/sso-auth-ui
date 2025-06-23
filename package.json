@@ -1,0 +1,95 @@
+{
+  "name": "@tjsglion/sso-auth-ui",
+  "version": "1.0.0",
+  "description": "Complete authentication UI components for SSO integration",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./themes": {
+      "import": "./dist/themes/index.esm.js",
+      "require": "./dist/themes/index.js",
+      "types": "./dist/themes/index.d.ts"
+    },
+    "./hooks": {
+      "import": "./dist/hooks/index.esm.js",
+      "require": "./dist/hooks/index.js",
+      "types": "./dist/hooks/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.esm.js",
+      "require": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "echo \"Error: no lint specified\" && exit 1",
+    "type-check": "tsc --noEmit",
+    "publish:patch": "node scripts/publish.cjs --patch",
+    "publish:minor": "node scripts/publish.cjs --minor",
+    "publish:major": "node scripts/publish.cjs --major",
+    "publish:dry-run": "node scripts/publish.cjs --dry-run",
+    "publish:skip-tests": "node scripts/publish.cjs --skip-tests",
+    "publish:quick": "node scripts/quick-publish.js",
+    "prepublishOnly": "npm run build && npm run type-check",
+    "postpublish": "echo \"Package published successfully!\""
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "dependencies": {
+    "@tjsglion/sso-client-sdk": "^1.0.0",
+    "@tjsglion/sso-icons": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@rollup/plugin-commonjs": "^25.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "rollup": "^3.0.0",
+    "rollup-plugin-dts": "^5.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "sso",
+    "authentication",
+    "login",
+    "react",
+    "ui",
+    "components",
+    "oauth",
+    "cloudflare-workers",
+    "typescript",
+    "hooks",
+    "themes"
+  ],
+  "author": "TJ <tjsglion@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tjsglion/cloudflare-workers-turso.git"
+  },
+  "homepage": "https://github.com/tjsglion/cloudflare-workers-turso#readme",
+  "bugs": {
+    "url": "https://github.com/tjsglion/cloudflare-workers-turso/issues"
+  }
+} 

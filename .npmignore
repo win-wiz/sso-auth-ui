@@ -1,0 +1,38 @@
+# 源码文件
+src/
+*.ts
+*.tsx
+
+# 配置文件
+tsconfig.json
+rollup.config.js
+vite.config.ts
+
+# 开发依赖
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# 开发工具
+.vscode/
+.idea/
+*.log
+
+# 测试文件
+test/
+tests/
+__tests__/
+*.test.*
+*.spec.*
+
+# 文档
+docs/
+*.md
+!README.md
+
+# 其他
+.git/
+.gitignore
+.env
+.env.* 
