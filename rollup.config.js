@@ -17,8 +17,6 @@ const commonPlugins = [
   }),
   typescript({
     tsconfig: './tsconfig.json',
-    declaration: true,
-    declarationDir: './dist',
     sourceMap: !isProduction,
     exclude: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', 'examples/**/*']
   })

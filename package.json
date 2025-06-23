@@ -35,7 +35,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc --emitDeclarationOnly && rollup -c",
+    "build": "npm run clean && tsc --emitDeclarationOnly && rollup -c",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
     "build:full": "node scripts/build.js",
