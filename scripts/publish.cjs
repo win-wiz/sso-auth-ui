@@ -230,7 +230,7 @@ function publishToNpm(options) {
     logError('未登录npm，请先运行 npm login');
     process.exit(1);
   }
-  const publishCommand = options.dryRun ? 'npm publish --dry-run' : 'npm publish';
+  const publishCommand = options.dryRun ? 'npm publish --dry-run' : 'npm publish --ignore-scripts';
   execCommand(publishCommand);
   logSuccess('发布到npm成功');
 }
