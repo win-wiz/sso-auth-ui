@@ -1,6 +1,6 @@
 {
   "name": "@tjsglion/sso-auth-ui",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Complete authentication UI components for SSO integration",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -60,8 +60,8 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@tjsglion/sso-client-sdk": "^1.0.0",
-    "@tjsglion/sso-icons": "^1.0.0"
+    "@tjsglion/sso-client-sdk": "^1.1.1",
+    "@tjsglion/sso-icons": "^1.0.5"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",
