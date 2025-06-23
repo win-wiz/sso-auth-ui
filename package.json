@@ -1,32 +1,34 @@
 {
   "name": "@tjsglion/sso-auth-ui",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Complete authentication UI components for SSO integration",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
+      "import": "./dist/index.js",
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./themes": {
-      "import": "./dist/themes/index.esm.js",
+      "import": "./dist/themes/index.js",
       "require": "./dist/themes/index.js",
       "types": "./dist/themes/index.d.ts"
     },
     "./hooks": {
-      "import": "./dist/hooks/index.esm.js",
+      "import": "./dist/hooks/index.js",
       "require": "./dist/hooks/index.js",
       "types": "./dist/hooks/index.d.ts"
     },
     "./types": {
-      "import": "./dist/types/index.esm.js",
+      "import": "./dist/types/index.js",
       "require": "./dist/types/index.js",
       "types": "./dist/types/index.d.ts"
-    }
+    },
+    "./package.json": "./package.json"
   },
+  "sideEffects": false,
   "files": [
     "dist",
     "README.md"
