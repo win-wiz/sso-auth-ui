@@ -62,8 +62,12 @@ export interface ThemeConfig {
   primaryColor?: string;
   /** 背景色 */
   backgroundColor?: string;
+  /** 卡片背景色 */
+  cardBg?: string;
   /** 文字颜色 */
   textColor?: string;
+  /** 按钮文字颜色 */
+  buttonTextColor?: string;
   /** 边框颜色 */
   borderColor?: string;
   /** 错误颜色 */
@@ -109,15 +113,23 @@ export interface RegisterFormProps extends AuthFormProps {
   privacyUrl?: string;
 }
 
+// 兼容 SSOProvider 扩展
+export interface SSOProviderWithColor extends SSOProvider {
+  brandColor?: string;
+  textColor?: string;
+}
+
 export interface SSOButtonsProps {
   /** SSO提供商列表 */
-  providers: SSOProvider[];
+  providers: SSOProviderWithColor[];
   /** 点击SSO按钮回调 */
-  onSSOClick: (provider: SSOProvider) => void;
+  onSSOClick: (provider: SSOProviderWithColor) => void;
   /** 主题配置 */
   theme?: ThemeConfig;
   /** 自定义样式类名 */
   className?: string;
+  /** 按钮自定义样式类名 */
+  buttonClass?: string;
 }
 
 export interface TwoFactorAuthProps {

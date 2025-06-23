@@ -7,6 +7,7 @@ import { TwoFactorAuth } from './TwoFactorAuth';
 import { PhoneAuth } from './PhoneAuth';
 import { SSOButtons } from './SSOButtons';
 import { useAuthContext } from './AuthProvider';
+import { AuthCard } from './AuthCard';
 
 export type AuthMethod = 'email' | 'phone' | 'sso' | '2fa';
 
@@ -140,27 +141,6 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
     window.location.href = `${finalConfig.apiUrl}/auth/sso/${provider.id}`;
   };
 
-  const containerStyle = {
-    backgroundColor: theme?.backgroundColor || '#ffffff',
-    border: `1px solid ${theme?.borderColor || '#d1d5db'}`,
-    borderRadius: theme?.borderRadius || '0.5rem',
-    boxShadow: theme?.boxShadow || '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-  };
-
-  const tabStyle = {
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: theme?.textColor || '#1f2937',
-    cursor: 'pointer',
-    padding: '8px 16px',
-  };
-
-  const activeTabStyle = {
-    ...tabStyle,
-    color: theme?.primaryColor || '#3b82f6',
-    borderBottom: `2px solid ${theme?.primaryColor || '#3b82f6'}`,
-  };
-
   if (show2FA) {
     return (
       <TwoFactorAuth
@@ -173,23 +153,20 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
   }
 
   return (
-    <div className={`unified-auth-form ${className}`} style={containerStyle}>
-      {finalConfig.appLogo && (
-        <div className="app-logo">
-          <img src={finalConfig.appLogo} alt={finalConfig.appName || 'App Logo'} />
-        </div>
-      )}
-      
-      <h2>{finalConfig.appName || '登录'}</h2>
-
+    <AuthCard
+      logo={finalConfig.appLogo && <img src={finalConfig.appLogo} alt={finalConfig.appName || 'App Logo'} className="h-12 mb-2" />}
+      title={finalConfig.appName || '登录'}
+      className={className}
+      cardBg={theme?.cardBg || 'bg-gray-50'}
+    >
       {showMethodSwitch && enabledMethods.length > 1 && (
-        <div className="method-tabs">
+        <div className="flex justify-center mb-6 gap-2">
           {enabledMethods.map((method) => (
             <button
               key={method}
+              type="button"
               onClick={() => setCurrentMethod(method)}
-              style={currentMethod === method ? activeTabStyle : tabStyle}
-              className={`method-tab ${currentMethod === method ? 'active' : ''}`}
+              className={`px-4 py-2 rounded-t-md text-sm font-medium border-b-2 transition-colors focus:outline-none ${currentMethod === method ? 'border-blue-600 text-blue-600 bg-white' : 'border-transparent text-gray-500 bg-gray-100 hover:bg-gray-200'}`}
             >
               {method === 'email' && '邮箱登录'}
               {method === 'phone' && '手机登录'}
@@ -198,20 +175,16 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
           ))}
         </div>
       )}
-
-      <div className="auth-content">
-        {currentMethod === 'email' && finalConfig.authMethods.emailPassword?.enabled && (
+      <div className="mt-2">
+        {currentMethod === 'email' && (
           <LoginForm
             config={finalConfig}
             theme={theme}
             onLoginSuccess={handleEmailLogin}
             onLoginError={onLoginError}
-            showRememberMe={true}
-            showForgotPassword={true}
           />
         )}
-
-        {currentMethod === 'phone' && finalConfig.authMethods.phone?.enabled && (
+        {currentMethod === 'phone' && (
           <PhoneAuth
             phone=""
             code=""
@@ -220,9 +193,8 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
             theme={theme}
           />
         )}
-
         {currentMethod === 'sso' && finalConfig.authMethods.sso?.enabled && finalConfig.authMethods.sso.providers && (
-          <div className="sso-section">
+          <div className="mt-4">
             <SSOButtons
               providers={finalConfig.authMethods.sso.providers}
               onSSOClick={handleSSOClick}
@@ -231,6 +203,6 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </AuthCard>
   );
 }; 

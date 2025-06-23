@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { LoginFormProps, AuthContextType } from '../types';
 import { SSOButtons } from './SSOButtons';
 import { useAuthContext } from './AuthProvider';
+import { AuthCard } from './AuthCard';
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   config,
@@ -81,105 +82,78 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     }
   };
 
-  const formStyle = {
-    backgroundColor: theme?.backgroundColor || '#ffffff',
-    border: `1px solid ${theme?.borderColor || '#d1d5db'}`,
-    borderRadius: theme?.borderRadius || '0.5rem',
-    boxShadow: theme?.boxShadow || '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-  };
-
-  const inputStyle = {
-    border: `1px solid ${theme?.borderColor || '#d1d5db'}`,
-    borderRadius: theme?.borderRadius || '0.375rem',
-    color: theme?.textColor || '#1f2937',
-  };
-
-  const buttonStyle = {
-    backgroundColor: theme?.primaryColor || '#3b82f6',
-    color: '#ffffff',
-    borderRadius: theme?.borderRadius || '0.375rem',
-  };
-
   return (
-    <div className={`login-form ${className}`} style={formStyle}>
-      {finalConfig.appLogo && (
-        <div className="app-logo">
-          <img src={finalConfig.appLogo} alt={finalConfig.appName || 'App Logo'} />
-        </div>
-      )}
-      
-      <h2>{finalConfig.appName || 'Login'}</h2>
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
+    <AuthCard
+      logo={finalConfig.appLogo && <img src={finalConfig.appLogo} alt={finalConfig.appName || 'App Logo'} className="h-12 mb-2" />}
+      title={finalConfig.appName || '登录'}
+      className={className}
+      cardBg={theme?.cardBg || 'bg-gray-50'}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">邮箱</label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={inputStyle}
             required
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
         </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">密码</label>
           <input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={inputStyle}
             required
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
         </div>
-
         {error && (
-          <div className="error-message" style={{ color: theme?.errorColor || '#ef4444' }}>
-            {error}
-          </div>
+          <div className="text-red-500 text-sm">{error}</div>
         )}
-
         {showRememberMe && (
-          <div className="form-group checkbox">
-            <label>
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              Remember me
-            </label>
+          <div className="flex items-center">
+            <input
+              id="rememberMe"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900">记住我</label>
           </div>
         )}
-
         <button
           type="submit"
           disabled={loading}
-          style={buttonStyle}
-          className="submit-button"
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? '登录中...' : '登录'}
         </button>
       </form>
-
       {showForgotPassword && (
-        <div className="forgot-password">
-          <a href="/forgot-password">Forgot your password?</a>
+        <div className="mt-2 text-right">
+          <a href="/forgot-password" className="text-sm text-blue-600 hover:underline">忘记密码？</a>
         </div>
       )}
-
       {finalConfig.authMethods.sso?.enabled && finalConfig.authMethods.sso.providers && (
-        <div className="sso-section">
-          <div className="divider">or</div>
+        <div className="mt-6">
+          <div className="relative flex items-center justify-center">
+            <span className="px-2 bg-white text-gray-400 text-xs">或</span>
+            <div className="absolute left-0 right-0 h-px bg-gray-200" />
+          </div>
           <SSOButtons
             providers={finalConfig.authMethods.sso.providers}
             onSSOClick={handleSSOClick}
             theme={theme}
+            className="mt-4"
           />
         </div>
       )}
-    </div>
+    </AuthCard>
   );
 }; 

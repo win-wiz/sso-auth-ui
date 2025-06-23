@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PhoneAuthProps } from '../types';
+import { AuthCard } from './AuthCard';
 
 export const PhoneAuth: React.FC<PhoneAuthProps> = ({
   phone,
@@ -38,115 +39,81 @@ export const PhoneAuth: React.FC<PhoneAuthProps> = ({
     }
   };
 
-  const inputStyle = {
-    border: `1px solid ${theme?.borderColor || '#d1d5db'}`,
-    borderRadius: theme?.borderRadius || '0.375rem',
-    color: theme?.textColor || '#1f2937',
-  };
-
-  const buttonStyle = {
-    backgroundColor: theme?.primaryColor || '#3b82f6',
-    color: '#ffffff',
-    borderRadius: theme?.borderRadius || '0.375rem',
-  };
-
-  const containerStyle = {
-    backgroundColor: theme?.backgroundColor || '#ffffff',
-    border: `1px solid ${theme?.borderColor || '#d1d5db'}`,
-    borderRadius: theme?.borderRadius || '0.5rem',
-    boxShadow: theme?.boxShadow || '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-  };
-
   if (step === 'phone') {
     return (
-      <div className={`phone-auth ${className}`} style={containerStyle}>
-        <h3>手机号登录</h3>
-        <p>请输入您的手机号</p>
-        
-        <div className="phone-input">
-          <input
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, '').slice(0, 11);
-              setPhoneNumber(value);
-            }}
-            placeholder="请输入手机号"
-            maxLength={11}
-            style={inputStyle}
-            autoFocus
-          />
-        </div>
-        
-        <button
-          onClick={handleSendCode}
-          disabled={!phoneNumber || phoneNumber.length < 11}
-          style={buttonStyle}
-          className="send-code-button"
-        >
-          发送验证码
-        </button>
-      </div>
+      <AuthCard title="手机号登录" className={className} cardBg={theme?.cardBg || 'bg-gray-50'}>
+        <form className="space-y-4" onSubmit={e => { e.preventDefault(); handleSendCode(); }}>
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">手机号</label>
+            <input
+              id="phone"
+              type="tel"
+              value={phoneNumber}
+              onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 11))}
+              placeholder="请输入手机号"
+              maxLength={11}
+              required
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              autoFocus
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={!phoneNumber || phoneNumber.length < 11}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            发送验证码
+          </button>
+        </form>
+      </AuthCard>
     );
   }
 
   return (
-    <div className={`phone-auth ${className}`} style={containerStyle}>
-      <h3>验证码登录</h3>
-      <p>验证码已发送至 {phoneNumber}</p>
-      
-      <div className="code-input">
-        <input
-          type="text"
-          value={verificationCode}
-          onChange={(e) => {
-            const value = e.target.value.replace(/\D/g, '').slice(0, 6);
-            setVerificationCode(value);
-          }}
-          placeholder="6位验证码"
-          maxLength={6}
-          style={inputStyle}
-          autoFocus
-        />
-      </div>
-      
-      <div className="actions">
+    <AuthCard title="验证码登录" className={className} cardBg={theme?.cardBg || 'bg-gray-50'}>
+      <div className="mb-2 text-sm text-gray-600">验证码已发送至 {phoneNumber}</div>
+      <form className="space-y-4" onSubmit={e => { e.preventDefault(); handleVerify(); }}>
+        <div>
+          <label htmlFor="code" className="block text-sm font-medium text-gray-700">验证码</label>
+          <input
+            id="code"
+            type="text"
+            value={verificationCode}
+            onChange={e => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder="6位验证码"
+            maxLength={6}
+            required
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            autoFocus
+          />
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={verificationCode.length !== 6}
+            className="flex-1 py-2 px-4 rounded-md bg-blue-600 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            登录
+          </button>
+          <button
+            type="button"
+            onClick={() => setStep('phone')}
+            className="flex-1 py-2 px-4 rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+          >
+            返回
+          </button>
+        </div>
+      </form>
+      <div className="mt-4 text-center">
         <button
-          onClick={handleVerify}
-          disabled={verificationCode.length !== 6}
-          style={buttonStyle}
-          className="verify-button"
-        >
-          登录
-        </button>
-        <button
-          onClick={() => setStep('phone')}
-          style={{
-            ...buttonStyle,
-            backgroundColor: 'transparent',
-            color: theme?.textColor || '#1f2937',
-            border: `1px solid ${theme?.borderColor || '#d1d5db'}`,
-          }}
-          className="back-button"
-        >
-          返回
-        </button>
-      </div>
-      
-      <div className="resend-section">
-        <button
+          type="button"
           onClick={handleSendCode}
           disabled={countdown > 0}
-          style={{
-            backgroundColor: 'transparent',
-            color: theme?.primaryColor || '#3b82f6',
-            border: 'none',
-            cursor: countdown > 0 ? 'not-allowed' : 'pointer',
-          }}
+          className="text-blue-600 hover:underline disabled:text-gray-400 disabled:cursor-not-allowed"
         >
           {countdown > 0 ? `${countdown}秒后重发` : '重新发送验证码'}
         </button>
       </div>
-    </div>
+    </AuthCard>
   );
 }; 

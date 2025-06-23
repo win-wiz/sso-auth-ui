@@ -9,29 +9,23 @@ export const SSOButtons: React.FC<SSOButtonsProps> = ({
   onSSOClick,
   theme,
   className = '',
+  buttonClass = '',
 }) => {
-  const buttonStyle = {
-    backgroundColor: theme?.backgroundColor || '#ffffff',
-    border: `1px solid ${theme?.borderColor || '#d1d5db'}`,
-    borderRadius: theme?.borderRadius || '0.5rem',
-    color: theme?.textColor || '#1f2937',
-    boxShadow: theme?.boxShadow || '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-  };
-
   return (
-    <div className={`sso-buttons ${className}`}>
+    <div className={`flex flex-col gap-3 mt-4 ${className}`}>
       {providers.map((provider) => (
         <button
           key={provider.id}
           onClick={() => onSSOClick(provider)}
-          style={buttonStyle}
-          className="sso-button"
+          className={`flex items-center justify-center gap-2 py-2 rounded-md border font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${buttonClass}`}
+          style={{
+            background: provider.brandColor || theme?.primaryColor || '#f3f4f6',
+            color: provider.textColor || theme?.buttonTextColor || '#111827',
+            borderColor: theme?.borderColor || '#d1d5db',
+          }}
         >
           {/* @ts-ignore */}
-          <SSOIcon 
-            provider={provider} 
-            size={20} 
-          />
+          <SSOIcon provider={provider} size={20} />
           <span>Continue with {provider.name}</span>
         </button>
       ))}

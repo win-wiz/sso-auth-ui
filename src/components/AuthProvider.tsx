@@ -1,19 +1,22 @@
 "use client";
 
 import React, { createContext, useContext } from 'react';
-import { AuthProviderProps, AuthContextType } from '../types';
+import { AuthProviderProps, AuthContextType, ThemeConfig } from '../types';
 import { useAuth } from '../hooks/useAuth';
 
-const AuthContext = createContext<AuthContextType | null>(null);
+interface AuthContextWithTheme extends AuthContextType {
+  theme?: ThemeConfig;
+}
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ config, children }) => {
+const AuthContext = createContext<AuthContextWithTheme | null>(null);
+
+export const AuthProvider: React.FC<AuthProviderProps & { theme?: ThemeConfig }> = ({ config, children, theme }) => {
   const auth = useAuth(config);
-
-  const contextValue: AuthContextType = {
+  const contextValue: AuthContextWithTheme = {
     ...auth,
-    config
+    config,
+    theme,
   };
-
   return (
     <AuthContext.Provider value={contextValue}>
       {children}
@@ -21,7 +24,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ config, children }) 
   );
 };
 
-export const useAuthContext = (): AuthContextType => {
+export const useAuthContext = (): AuthContextWithTheme => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error('useAuthContext must be used within an AuthProvider');
