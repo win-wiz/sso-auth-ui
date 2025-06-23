@@ -25,7 +25,11 @@ export const SSOButtons: React.FC<SSOButtonsProps> = ({
           style={buttonStyle}
           className="sso-button"
         >
-          <SSOIcon provider={provider} size={20} />
+          {/* @ts-ignore */}
+          <SSOIcon 
+            provider={provider} 
+            size={20} 
+          />
           <span>Continue with {provider.name}</span>
         </button>
       ))}
