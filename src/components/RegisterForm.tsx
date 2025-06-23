@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { RegisterFormProps } from '../types';
+import { RegisterFormProps, AuthContextType } from '../types';
 import { SSOButtons } from './SSOButtons';
+import { useAuthContext } from './AuthProvider';
 
 export const RegisterForm: React.FC<RegisterFormProps> = ({
   config,
@@ -21,6 +22,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // 尝试从AuthProvider上下文获取config
+  const authContext = useAuthContext();
+  const finalConfig = config || authContext?.config;
+
+  if (!finalConfig) {
+    throw new Error('RegisterForm requires a config prop or to be used within an AuthProvider.');
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -40,7 +49,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     }
 
     try {
-      const response = await fetch(`${config.apiUrl}/auth/register`, {
+      const response = await fetch(`${finalConfig.apiUrl}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +77,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   };
 
   const handleSSOClick = (provider: any) => {
-    window.location.href = `${config.apiUrl}/auth/sso/${provider.id}`;
+    if (authContext) {
+      authContext.loginWithSSO(provider);
+    } else {
+      window.location.href = `${finalConfig.apiUrl}/auth/sso/${provider.id}`;
+    }
   };
 
   const formStyle = {
@@ -92,9 +105,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 
   return (
     <div className={`register-form ${className}`} style={formStyle}>
-      {config.appLogo && (
+      {finalConfig.appLogo && (
         <div className="app-logo">
-          <img src={config.appLogo} alt={config.appName || 'App Logo'} />
+          <img src={finalConfig.appLogo} alt={finalConfig.appName || 'App Logo'} />
         </div>
       )}
       
@@ -186,11 +199,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </div>
       )}
 
-      {config.authMethods.sso?.enabled && config.authMethods.sso.providers && (
+      {finalConfig.authMethods.sso?.enabled && finalConfig.authMethods.sso.providers && (
         <div className="sso-section">
           <div className="divider">or</div>
           <SSOButtons
-            providers={config.authMethods.sso.providers}
+            providers={finalConfig.authMethods.sso.providers}
             onSSOClick={handleSSOClick}
             theme={theme}
           />

@@ -1,6 +1,6 @@
 {
   "name": "@tjsglion/sso-auth-ui",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Complete authentication UI components for SSO integration",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -35,7 +35,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsc --emitDeclarationOnly && rollup -c",
+    "build": "npm run clean && tsc --emitDeclarationOnly && rollup -c",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
     "build:full": "node scripts/build.js",

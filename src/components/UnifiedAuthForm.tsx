@@ -4,6 +4,7 @@ import { LoginForm } from './LoginForm';
 import { TwoFactorAuth } from './TwoFactorAuth';
 import { PhoneAuth } from './PhoneAuth';
 import { SSOButtons } from './SSOButtons';
+import { useAuthContext } from './AuthProvider';
 
 export type AuthMethod = 'email' | 'phone' | 'sso' | '2fa';
 
@@ -30,17 +31,25 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
   const [loginCredentials, setLoginCredentials] = useState<LoginCredentials>({});
   const [show2FA, setShow2FA] = useState(false);
 
+  // 尝试从AuthProvider上下文获取config
+  const authContext = useAuthContext();
+  const finalConfig = config || authContext?.config;
+
+  if (!finalConfig) {
+    throw new Error('UnifiedAuthForm requires a config prop or to be used within an AuthProvider.');
+  }
+
   // 获取启用的认证方式
   const enabledMethods = methodOrder.filter(method => {
     switch (method) {
       case 'email':
-        return config.authMethods.emailPassword?.enabled;
+        return finalConfig.authMethods.emailPassword?.enabled;
       case 'phone':
-        return config.authMethods.phone?.enabled;
+        return finalConfig.authMethods.phone?.enabled;
       case 'sso':
-        return config.authMethods.sso?.enabled;
+        return finalConfig.authMethods.sso?.enabled;
       case '2fa':
-        return config.authMethods.twoFactor?.enabled;
+        return finalConfig.authMethods.twoFactor?.enabled;
       default:
         return false;
     }
@@ -48,7 +57,7 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
 
   const handleEmailLogin = async (credentials: LoginCredentials) => {
     try {
-      const response = await fetch(`${config.apiUrl}/auth/login`, {
+      const response = await fetch(`${finalConfig.apiUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),
@@ -74,7 +83,7 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
 
   const handle2FAVerify = async (code: string) => {
     try {
-      const response = await fetch(`${config.apiUrl}/auth/2fa/verify`, {
+      const response = await fetch(`${finalConfig.apiUrl}/auth/2fa/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -96,7 +105,7 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
 
   const handlePhoneLogin = async (phone: string, code: string) => {
     try {
-      const response = await fetch(`${config.apiUrl}/auth/phone/login`, {
+      const response = await fetch(`${finalConfig.apiUrl}/auth/phone/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, code }),
@@ -115,7 +124,7 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
 
   const handleSendCode = async (phone: string) => {
     try {
-      await fetch(`${config.apiUrl}/auth/phone/send-code`, {
+      await fetch(`${finalConfig.apiUrl}/auth/phone/send-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
@@ -126,7 +135,7 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
   };
 
   const handleSSOClick = (provider: any) => {
-    window.location.href = `${config.apiUrl}/auth/sso/${provider.id}`;
+    window.location.href = `${finalConfig.apiUrl}/auth/sso/${provider.id}`;
   };
 
   const containerStyle = {
@@ -163,13 +172,13 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
 
   return (
     <div className={`unified-auth-form ${className}`} style={containerStyle}>
-      {config.appLogo && (
+      {finalConfig.appLogo && (
         <div className="app-logo">
-          <img src={config.appLogo} alt={config.appName || 'App Logo'} />
+          <img src={finalConfig.appLogo} alt={finalConfig.appName || 'App Logo'} />
         </div>
       )}
       
-      <h2>{config.appName || '登录'}</h2>
+      <h2>{finalConfig.appName || '登录'}</h2>
 
       {showMethodSwitch && enabledMethods.length > 1 && (
         <div className="method-tabs">
@@ -189,9 +198,9 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
       )}
 
       <div className="auth-content">
-        {currentMethod === 'email' && config.authMethods.emailPassword?.enabled && (
+        {currentMethod === 'email' && finalConfig.authMethods.emailPassword?.enabled && (
           <LoginForm
-            config={config}
+            config={finalConfig}
             theme={theme}
             onLoginSuccess={handleEmailLogin}
             onLoginError={onLoginError}
@@ -200,7 +209,7 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
           />
         )}
 
-        {currentMethod === 'phone' && config.authMethods.phone?.enabled && (
+        {currentMethod === 'phone' && finalConfig.authMethods.phone?.enabled && (
           <PhoneAuth
             phone=""
             code=""
@@ -210,10 +219,10 @@ export const UnifiedAuthForm: React.FC<UnifiedAuthFormProps> = ({
           />
         )}
 
-        {currentMethod === 'sso' && config.authMethods.sso?.enabled && config.authMethods.sso.providers && (
+        {currentMethod === 'sso' && finalConfig.authMethods.sso?.enabled && finalConfig.authMethods.sso.providers && (
           <div className="sso-section">
             <SSOButtons
-              providers={config.authMethods.sso.providers}
+              providers={finalConfig.authMethods.sso.providers}
               onSSOClick={handleSSOClick}
               theme={theme}
             />

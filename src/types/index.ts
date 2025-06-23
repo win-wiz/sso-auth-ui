@@ -78,7 +78,7 @@ export interface ThemeConfig {
 
 export interface AuthFormProps {
   /** 认证配置 */
-  config: AuthConfig;
+  config?: AuthConfig;
   /** 主题配置 */
   theme?: ThemeConfig;
   /** 登录成功回调 */
