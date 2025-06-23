@@ -115,35 +115,35 @@ function checkDependencies() {
 }
 
 async function checkGitStatus(options) {
-  logStep('检查Git状态');
-  const status = execCommandSilent('git status --porcelain');
-  if (status) {
-    logWarning('发现未提交的更改:');
-    console.log(status.trim());
-    if (options.nonInteractive) {
-      logWarning('非交互模式，发布已取消。请先提交更改。');
-      process.exit(1);
+    logStep('检查Git状态');
+    const status = execCommandSilent('git status --porcelain');
+    if (!status) {
+        logSuccess('Git工作目录是干净的。');
+        return;
     }
-    const answer = await askQuestion('是否继续发布？(y/N): ');
-    if (answer.toLowerCase() !== 'y') {
-      logError('发布已取消');
-      process.exit(1);
-    }
-  }
-  const currentBranch = execCommandSilent('git rev-parse --abbrev-ref HEAD');
-  if (currentBranch && !['main', 'master'].includes(currentBranch.trim())) {
-    logWarning(`当前不在主分支上，分支: ${currentBranch.trim()}`);
-    if (options.nonInteractive) {
-      logWarning('非交互模式，继续发布...');
-    } else {
-        const answer = await askQuestion('是否继续发布？(y/N): ');
+
+    const allowedChanges = ['package.json', 'pnpm-lock.yaml', 'RELEASE_NOTES.md'];
+    const significantChanges = status.trim().split('\n').filter(line => {
+        const fileName = line.substring(3);
+        return !allowedChanges.some(f => fileName.includes(f));
+    });
+
+    if (significantChanges.length > 0) {
+        logWarning('发现重要的未提交更改:');
+        console.log(significantChanges.join('\n'));
+        if (options.nonInteractive) {
+            logError('非交互模式下检测到重要更改，发布已取消。');
+            process.exit(1);
+        }
+        const answer = await askQuestion('是否要继续发布并包含这些更改? (y/N): ');
         if (answer.toLowerCase() !== 'y') {
             logError('发布已取消');
             process.exit(1);
         }
+    } else {
+        logInfo('发现的未提交更改将被自动包含在发布提交中。');
+        console.log(status.trim());
     }
-  }
-  logSuccess('Git状态检查通过');
 }
 
 function runTests() {
@@ -184,10 +184,11 @@ function checkBuildOutput() {
 function updateVersion(versionType) {
   logStep('更新版本号');
   const pkg = readPackageJson();
-  const newVersion = incrementVersion(pkg.version, versionType);
+  const currentVersion = pkg.version;
+  const newVersion = incrementVersion(currentVersion, versionType);
   pkg.version = newVersion;
   writePackageJson(pkg);
-  logSuccess(`版本号已更新: ${pkg.version} → ${newVersion}`);
+  logSuccess(`版本号已更新: ${currentVersion} → ${newVersion}`);
   return newVersion;
 }
 
@@ -210,14 +211,15 @@ function generateReleaseNotes(version) {
 
 function createCommitAndTag(version) {
   logStep('创建Git提交和标签');
-  try {
+  const status = execCommandSilent('git status --porcelain');
+  if (status) {
     execCommand('git add .');
     execCommand(`git commit -m "chore: release v${version}"`);
-    execCommand(`git tag v${version}`);
-    logSuccess(`已创建提交和标签 v${version}`);
-  } catch (error) {
-    logWarning('创建Git提交和标签失败，可能是因为没有需要提交的更改。');
+  } else {
+    logInfo('没有需要提交的更改。');
   }
+  execCommand(`git tag -f v${version}`);
+  logSuccess(`已创建或更新标签 v${version}`);
 }
 
 function publishToNpm(options) {
