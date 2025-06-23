@@ -46,30 +46,19 @@ function logInfo(message) {
   log(`ℹ️  ${message}`, 'cyan');
 }
 
-// 执行命令
 function execCommand(command, options = {}) {
   try {
-    return execSync(command, {
-      stdio: 'inherit',
-      encoding: 'utf8',
-      ...options
-    });
+    return execSync(command, { stdio: 'inherit', encoding: 'utf8', ...options });
   } catch (error) {
     logError(`命令执行失败: ${command}`);
     throw error;
   }
 }
 
-// 执行命令（静默模式）
 function execCommandSilent(command, options = {}) {
   try {
-    return execSync(command, {
-      stdio: 'pipe',
-      encoding: 'utf8',
-      ...options
-    });
+    return execSync(command, { stdio: 'pipe', encoding: 'utf8', ...options });
   } catch (error) {
-    // 错误在调用处处理
     return null;
   }
 }
@@ -98,15 +87,31 @@ function incrementVersion(version, type) {
 }
 
 async function askQuestion(query) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise(resolve => rl.question(query, ans => {
     rl.close();
     resolve(ans);
   }));
+}
+
+function checkDependencies() {
+    logStep('检查依赖');
+    const nodeVersion = process.version;
+    logInfo(`Node.js版本: ${nodeVersion}`);
+    try {
+        const npmVersion = execCommandSilent('npm --version');
+        if (npmVersion) logInfo(`npm版本: ${npmVersion.trim()}`);
+    } catch (error) {
+        logWarning('无法获取npm版本');
+    }
+    try {
+        const gitVersion = execCommandSilent('git --version');
+        if (gitVersion) logInfo(`Git版本: ${gitVersion.trim()}`);
+    } catch (error) {
+        logError('Git未安装');
+        throw new Error('Git未安装');
+    }
+    logSuccess('依赖检查通过');
 }
 
 async function checkGitStatus(options) {
@@ -125,7 +130,6 @@ async function checkGitStatus(options) {
       process.exit(1);
     }
   }
-
   const currentBranch = execCommandSilent('git rev-parse --abbrev-ref HEAD');
   if (currentBranch && !['main', 'master'].includes(currentBranch.trim())) {
     logWarning(`当前不在主分支上，分支: ${currentBranch.trim()}`);
@@ -139,116 +143,188 @@ async function checkGitStatus(options) {
         }
     }
   }
-
   logSuccess('Git状态检查通过');
 }
 
-
-function runBuild() {
-    logStep('构建项目');
-    execCommand('npm run build');
-    logSuccess('构建成功');
+function runTests() {
+  logStep('运行测试');
+  try {
+    const pkg = readPackageJson();
+    if (pkg.scripts && pkg.scripts.test) {
+      execCommand('npm test');
+      logSuccess('测试通过');
+    } else {
+      logInfo('没有找到测试脚本，跳过');
+    }
+  } catch (error) {
+    logError('测试失败');
+    throw error;
+  }
 }
 
-function updateVersionInPackageJson(versionType) {
+function buildProject() {
+  logStep('构建项目');
+  execCommand('npm run build');
+  logSuccess('构建成功');
+}
+
+function checkBuildOutput() {
+  logStep('检查构建输出');
+  try {
+    const distPath = path.join(process.cwd(), 'dist');
+    if (!fs.existsSync(distPath)) throw new Error('构建输出目录不存在');
+    if (fs.readdirSync(distPath).length === 0) throw new Error('构建输出为空');
+    logSuccess('构建输出检查通过');
+  } catch (error) {
+    logError('构建输出检查失败');
+    throw error;
+  }
+}
+
+function updateVersion(versionType) {
   logStep('更新版本号');
-  const currentVersion = getCurrentVersion();
-  const newVersion = incrementVersion(currentVersion, versionType);
   const pkg = readPackageJson();
+  const newVersion = incrementVersion(pkg.version, versionType);
   pkg.version = newVersion;
   writePackageJson(pkg);
-  logSuccess(`版本已更新: ${currentVersion} -> ${newVersion}`);
+  logSuccess(`版本号已更新: ${pkg.version} → ${newVersion}`);
   return newVersion;
 }
 
+function generateReleaseNotes(version) {
+  logStep('生成发布说明');
+  try {
+    const lastTag = execCommandSilent('git describe --tags --abbrev=0');
+    const commits = execCommandSilent(`git log --oneline ${lastTag ? lastTag.trim() : ''}..HEAD`);
+    if (commits && commits.trim()) {
+      const releaseNotes = `# 版本 ${version} 发布说明\n\n## 更新内容\n${commits.split('\n').filter(Boolean).map(c => `- ${c}`).join('\n')}`;
+      fs.writeFileSync('RELEASE_NOTES.md', releaseNotes);
+      logSuccess('发布说明已生成');
+    } else {
+      logInfo('没有新的提交，跳过发布说明生成');
+    }
+  } catch (error) {
+    logWarning('生成发布说明失败，跳过');
+  }
+}
+
 function createCommitAndTag(version) {
-    logStep('创建Git提交和标签');
-    execCommand(`git add package.json`);
+  logStep('创建Git提交和标签');
+  try {
+    execCommand('git add .');
     execCommand(`git commit -m "chore: release v${version}"`);
     execCommand(`git tag v${version}`);
     logSuccess(`已创建提交和标签 v${version}`);
+  } catch (error) {
+    logWarning('创建Git提交和标签失败，可能是因为没有需要提交的更改。');
+  }
 }
 
-function publishToNpm() {
+function publishToNpm(options) {
   logStep('发布到npm');
-  execCommand('npm publish');
-  logSuccess('成功发布到npm');
+  try {
+    execCommandSilent('npm whoami');
+  } catch (error) {
+    logError('未登录npm，请先运行 npm login');
+    process.exit(1);
+  }
+  const publishCommand = options.dryRun ? 'npm publish --dry-run' : 'npm publish';
+  execCommand(publishCommand);
+  logSuccess('发布到npm成功');
 }
 
-function pushToGit() {
-    logStep('推送到Git');
-    execCommand('git push origin --follow-tags');
-    logSuccess('成功推送到Git');
+function pushToGit(options) {
+  logStep('推送到Git');
+  if (options.dryRun) {
+    logInfo('试运行模式：跳过Git推送');
+    return;
+  }
+  try {
+    execCommand('git push origin HEAD --follow-tags');
+    logSuccess('推送到Git成功');
+  } catch (error) {
+    logError('推送到Git失败');
+    throw error;
+  }
 }
 
 async function rollback(version, options) {
-    logStep('执行回滚');
-    let shouldRollback = !options.nonInteractive;
+  logStep('执行回滚');
+  let shouldRollback = options.nonInteractive;
+  if (!shouldRollback) {
+    const answer = await askQuestion('是否回滚？(y/N): ');
+    shouldRollback = answer.toLowerCase() === 'y';
+  }
+  if (shouldRollback) {
+    try {
+      execCommandSilent(`git tag -d v${version}`);
+      execCommand('git reset --hard HEAD~1');
+      logSuccess('回滚成功');
+    } catch (e) {
+      logError(`回滚失败: ${e.message}`);
+    }
+  }
+}
 
-    if (options.nonInteractive) {
-        shouldRollback = true;
-    } else {
-        const answer = await askQuestion('是否回滚？(y/N): ');
-        shouldRollback = answer.toLowerCase() === 'y';
-    }
-    
-    if (shouldRollback) {
-        try {
-            execCommandSilent(`git tag -d v${version}`);
-            execCommand('git reset --hard HEAD~1');
-            logSuccess('回滚成功');
-        } catch (e) {
-            logError(`回滚失败: ${e.message}`);
-        }
-    }
+function showHelp() {
+  console.log(`
+${colors.bright}SSO Auth UI 自动化发布脚本${colors.reset}
+用法: node scripts/publish.cjs [选项]
+选项:
+  --major              递增主版本号
+  --minor              递增次版本号
+  --patch              递增补丁版本号 [默认]
+  --skip-tests         跳过测试
+  --dry-run            试运行模式
+  --non-interactive    非交互模式 (CI/CD)
+  --help, -h           显示帮助信息
+`);
 }
 
 function parseArgs() {
-  const args = process.argv.slice(2);
-  const options = {
-    versionType: 'patch',
-    nonInteractive: false,
-  };
-
-  args.forEach(arg => {
-    if (['--major', '--minor', '--patch'].includes(arg)) {
-      options.versionType = arg.replace('--', '');
-    } else if (arg === '--ci' || arg === '--non-interactive') {
-      options.nonInteractive = true;
+  const options = { versionType: 'patch', skipTests: false, dryRun: false, nonInteractive: false };
+  for (const arg of process.argv.slice(2)) {
+    if (['--major', '--minor', '--patch'].includes(arg)) options.versionType = arg.substring(2);
+    else if (arg === '--skip-tests') options.skipTests = true;
+    else if (arg === '--dry-run') options.dryRun = true;
+    else if (arg === '--ci' || arg === '--non-interactive') options.nonInteractive = true;
+    else if (arg === '--help' || arg === '-h') {
+      showHelp();
+      process.exit(0);
     }
-  });
-
+  }
   if (process.env.CI || process.env.GITHUB_ACTIONS) {
     options.nonInteractive = true;
     logInfo('检测到CI环境，已自动启用非交互模式');
   }
-
   return options;
 }
 
 async function main() {
   const options = parseArgs();
   let newVersion;
-
   try {
+    log(`${colors.bright}${colors.magenta}🚀 开始发布流程${colors.reset}`);
+    checkDependencies();
     await checkGitStatus(options);
-    runBuild();
-    newVersion = updateVersionInPackageJson(options.versionType);
+    if (!options.skipTests) runTests();
+    buildProject();
+    checkBuildOutput();
+    newVersion = updateVersion(options.versionType);
+    generateReleaseNotes(newVersion);
     createCommitAndTag(newVersion);
-    publishToNpm();
-    pushToGit();
+    publishToNpm(options);
+    pushToGit(options);
     logSuccess(`🎉 版本 ${newVersion} 发布成功!`);
   } catch (error) {
     logError('发布失败');
-    if (newVersion) {
-      await rollback(newVersion, options);
-    }
+    if (newVersion) await rollback(newVersion, options);
     process.exit(1);
   }
 }
 
 main().catch(err => {
-    logError('脚本执行时发生未知错误');
-    console.error(err);
-    process.exit(1);
-}); 
+  logError('脚本执行时发生未知错误');
+  console.error(err);
+  process.exit(1);
+});
