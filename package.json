@@ -89,10 +89,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tjsglion/cloudflare-workers-turso.git"
+    "url": "https://github.com/win-wiz/sso-auth-ui.git"
   },
-  "homepage": "https://github.com/tjsglion/cloudflare-workers-turso#readme",
+  "homepage": "https://github.com/win-wiz/sso-auth-ui#readme",
   "bugs": {
-    "url": "https://github.com/tjsglion/cloudflare-workers-turso/issues"
+    "url": "https://github.com/win-wiz/sso-auth-ui/issues"
   }
 }
