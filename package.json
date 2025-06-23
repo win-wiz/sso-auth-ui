@@ -1,6 +1,6 @@
 {
   "name": "@tjsglion/sso-auth-ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Complete authentication UI components for SSO integration",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -35,14 +35,14 @@
     "access": "public"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "tsc --emitDeclarationOnly && rollup -c",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
     "build:full": "node scripts/build.js",
     "dev": "rollup -c -w",
     "prepare": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "echo \"Error: no lint specified\" && exit 1",
+    "test": "echo \"No tests specified, skipping...\" && exit 0",
+    "lint": "echo \"No lint specified, skipping...\" && exit 0",
     "prepublishOnly": "npm run build && npm run type-check",
     "postpublish": "echo \"Package published successfully!\"",
     "publish": "node scripts/publish.cjs --patch",
