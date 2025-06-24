@@ -121,9 +121,9 @@ export interface SSOProviderWithColor extends SSOProvider {
 
 export interface SSOButtonsProps {
   /** SSO提供商列表 */
-  providers: SSOProviderWithColor[];
+  providers?: SSOProviderWithColor[];
   /** 点击SSO按钮回调 */
-  onSSOClick: (provider: SSOProviderWithColor) => void;
+  onSSOClick?: (provider: SSOProviderWithColor) => void;
   /** 主题配置 */
   theme?: ThemeConfig;
   /** 自定义样式类名 */
@@ -199,6 +199,10 @@ export interface AuthContextType {
   verify2FA: (code: string) => Promise<void>;
   /** 检查认证状态 */
   checkAuth: () => Promise<void>;
+  /** 获取SSO提供商列表 */
+  getProviders: () => Promise<SSOProvider[]>;
+  /** SSO客户端实例 */
+  ssoClient: any;
 }
 
 export interface LoginCredentials {

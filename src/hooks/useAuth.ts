@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { SSOClient } from '@tjsglion/sso-client-sdk';
 import { AuthConfig, AuthContextType, LoginCredentials, RegisterCredentials } from '../types';
 
@@ -6,10 +6,11 @@ export const useAuth = (config: AuthConfig): AuthContextType => {
   const [user, setUser] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const ssoClient = new SSOClient({
+  // 使用 useMemo 确保 ssoClient 实例在配置不变时不会重新创建
+  const ssoClient = useMemo(() => new SSOClient({
     baseUrl: config.apiUrl,
     redirectUri: config.redirectUrl,
-  });
+  }), [config.apiUrl, config.redirectUrl]);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -99,6 +100,11 @@ export const useAuth = (config: AuthConfig): AuthContextType => {
     }
   }, [ssoClient]);
 
+  // 添加 getProviders 方法
+  const getProviders = useCallback(async () => {
+    return await ssoClient.getProviders();
+  }, [ssoClient]);
+
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -113,5 +119,7 @@ export const useAuth = (config: AuthConfig): AuthContextType => {
     loginWithSSO,
     verify2FA,
     checkAuth,
+    getProviders,  // 新增：获取提供商列表
+    ssoClient,     // 新增：暴露 ssoClient 实例
   };
 }; 
